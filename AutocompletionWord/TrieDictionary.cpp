@@ -142,10 +142,13 @@ void findMinPrefixes(TrieNode* root, char buf[], int ind, std::string& res)
             }
         }
 }
+//----------------------------------------------------------------------------------------
 
 void wordSubstitution(TrieNode* root,std::string& result, std::string currentWord ) // функция поиска слов для подстановки
 {
     if (!root) // если дерево пустое
+        return;
+    if (currentWord.empty())// если несчем сравнивать
         return;
     char buf[50]; // буфер в которой будем ложить символы подходящие для автоподстановки
     size_t indexChar = 0;  // индекс для буфера
@@ -167,44 +170,43 @@ void wordSubstitution(TrieNode* root,std::string& result, std::string currentWor
                     root = root->children[i];  // переходим в дочерний узел
                     charPresence = true;        // соообщаем что символ нашли
                     i = ALPHABET_SIZE;
-                 if (root->isEndOfWord && indexChar == currentWord.length()) // 
+                 if (root->isEndOfWord && indexChar == currentWord.length()) //  если последний символ введённого слова совпадает с концом слова в словаре
                 {
                     buf[indexChar] = '\0'; // закончить строку
-                    result += std::string(buf) + " "; // 
-                    counterWords++;
+                    result += std::string(buf) + " "; // добавить слово в результат 
+                    counterWords++;                   // увеличить счётчик слов
                   
                 }
-                    else if (indexChar == currentWord.length())
+                    else if (indexChar == currentWord.length()) // если просто закончилось введённое слово 
                     {
                      buf[indexChar] = '\0'; // закончить строку                  
-                        result += std::string(buf); // 
+                        result += std::string(buf); // добавить слово в результат 
                           
                     }
-                   
-                    
+                                       
                 }
             }
         }
     }
-   if (counterWords==0)
-    result.clear();
-    charPresence = false;
-    wordSubstitutionInner(root, buf, indexChar, result, counterWords, charPresence);
+   if (counterWords==0)  // если слов для автоподставления небыло найдено
+    result.clear();      // очищаем результат
+    charPresence = false; // т.к isEndOfWord может быть true, переменная исполнит роль флага окончания строки
+    wordSubstitutionInner(root, buf, indexChar, result, counterWords, charPresence);// запускаем алгоритм поиска слов
 }
-void wordSubstitutionInner(TrieNode* root, char buf[], int indexChar, std::string& result,int &counterWords,bool endWord)
+void wordSubstitutionInner(TrieNode* root, char buf[], int indexChar, std::string& result,int &counterWords,bool endWord)// внутрення функция поиска слов для подстановки
 {
-    if (endWord)
+    if (endWord)  // если дошли до конца слова
     {
         buf[indexChar] = '\0'; // закончить строку
-        result += std::string(buf)+" "; // 
-        counterWords++;
+        result += std::string(buf)+" "; // добавить к результату
+        counterWords++;                //  увеличить счётчик
     }
    
-    for (int i = 0; i < ALPHABET_SIZE; ++i)
+    for (int i = 0; i < ALPHABET_SIZE; ++i)// ищем  продолжение слова
     {
-        if (counterWords >= 3)
+        if (counterWords >= 3) // если слов уже три
             return;
-        if (root->children[i])
+        if (root->children[i]) // если есть следующий символ
         {
            buf[indexChar] = i + 'a';
            endWord = root->children[i]->isEndOfWord;

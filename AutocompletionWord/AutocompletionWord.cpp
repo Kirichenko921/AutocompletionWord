@@ -5,7 +5,7 @@
 
 int main()
 {
-	setlocale(LC_ALL,"ru");
+	// заполняем словарь
 	TrieNode* trieWord = new TrieNode();
 	insert(trieWord, "cat");
 	insert(trieWord, "catch");
@@ -20,177 +20,89 @@ int main()
 	insert(trieWord, "run");
 	
 	
-	std::string wordVariants;
-	wordVariants.clear();
-	std::string firstVersionWord;
-	std::string secondVersionWord;
-	std::string thirdVersionWord;
-	std::string inputWord;
-	std::string fullText;
-	std::string tempWord;
-	std::string send;
-	while (std::cin)
+	std::string wordVariants;// переменная для всех вариантов слов для автоподстановки
+	wordVariants.clear();    // очистим её 
+	std::string VersionWord;  // вариант выбранного слова из предложенных автоподстановкой
+	std::string inputWord;    // вводимое слово
+	std::string fullText;     // всё что ввёл пользователь
+	std::string tempWord;     // пееменная для хранения необработанных слов 
+	//std::string send;
+	bool space=true;           // проверка наличия пробелов
+		while (std::cin)  // программа будет работать пока пользователь не закроет терминал(чата нет и письмо отправлять не надо)
 	{
 		
 		//(std::cin >> inputWord).get();// если не будет работать cin раскоментить эту строку
 		getline(std::cin, inputWord);
 		//std::cin.ignore(32767, '\n');
-		if (inputWord == " ")
+		for (size_t i = 0,ib=0; i < inputWord.length(); ++i)// заполняем введённым текстом 
 		{
-			tempWord += inputWord;
-			fullText += tempWord;
-			std::cout << fullText;
-			tempWord.clear();
-			continue;
-		}
-		tempWord += inputWord;
-		
-		wordSubstitution(trieWord, wordVariants, tempWord);
-		if (wordVariants=="")
-		{
-			std::cout << fullText << tempWord;
-			continue;
-		}
-		char buf[50];
-		int indexVersion = 0;
-		int numberVersion = 0;
-
-		/*std::cout << "Select the appropriate word by pressing 1, 2 or 3. If there is no such word, press 0\n";
-		int сhoice;
-		std::cin >> сhoice;
-		std::cin.ignore(32767, '\n');
-		for (size_t i = 0, ib =0; i < wordVariants.length(); ++i)
-		{ 
-			if (сhoice == 1)
+			
+			fullText.push_back(inputWord[i]);
+			tempWord.push_back(inputWord[i]);
+			
+			if (inputWord[i] == ' ')  // если пользователь закончил вводить слово
 			{
-				buf[ib] = wordVariants[i];
+				tempWord.clear();    // убираем его из необработанных слов
+			}
+			
+		}					
+		wordSubstitution(trieWord, wordVariants, tempWord); // незаконченное слово отправляем на поиск сло для автоподстановки
+		if (wordVariants.empty())  // если в словаре вариантов нет
+		{
+			tempWord.clear(); 
+			std::cout << fullText;
+			continue;
+		}
+		wordVariants.erase(wordVariants.length() - 1); // убираем пробел 
+				int choice= 1;                      // нумерация вариантов
+		std::cout << std::endl<<choice<< " ";
+		for (size_t i = 0; i < wordVariants.length(); ++i)  // выводим варианты на экран
+		{
+			if (wordVariants[i] == ' ')
+			{
+				choice++;
+				std::cout << std::endl << choice;
+			}
+			std::cout << wordVariants[i];
+		}
+		std::cout << "\nSelect the appropriate word by pressing 1, 2 or 3. If there is no such word, press 0\n";  // предлагаем выбрать вариант
+		
+		std::cin >> choice;
+		std::cin.ignore(32767, '\n');
+		for (size_t i = 0; i < wordVariants.length(); ++i)  //  выбранное слово заносим в VersionWord
+		{ 
+			if (choice == 1)
+			{
+				VersionWord.push_back( wordVariants[i]);
+				
 			}
 			if (wordVariants[i] == ' ')
 			{
-				--сhoice;
+				--choice;
 			}
-		}*/
-		for (size_t i = 0; i < wordVariants.length(); ++i)
-		{
-			if (numberVersion == 0)
+			if (choice < 1)
 			{
-				buf[indexVersion] = wordVariants[i];
-				indexVersion++;
-				if (wordVariants[i] == ' ')
-				{
-					buf[indexVersion] = '\0';
-					firstVersionWord += std::string(buf);
-					numberVersion++;
-					indexVersion = 0;
-				}
-				continue;
-			}
-			else if (numberVersion == 1)
-			{
-				buf[indexVersion] = wordVariants[i];
-				indexVersion++;
-				if (wordVariants[i] == ' ')
-				{
-					buf[indexVersion] = '\0';
-					secondVersionWord += std::string(buf);
-					numberVersion++;
-					indexVersion = 0;
-				}
-				continue;
-			}
-			else if (numberVersion == 2)
-			{
-				buf[indexVersion] = wordVariants[i];
-				indexVersion++;
-				if (wordVariants[i] == ' ')
-				{
-					buf[indexVersion] = '\0';
-					thirdVersionWord += std::string(buf);
-					numberVersion++;
-					indexVersion = 0;
-				}
-				continue;
-			}
-
-		}
-
-		
-		std::cout << "1 " << firstVersionWord << std::endl;
-
-		std::cout << "2 " << secondVersionWord << std::endl;
-		std::cout << "3 " << thirdVersionWord << std::endl;
-
-		std::cout << "Select the appropriate word by pressing 1, 2 or 3. If there is no such word, press 0\n";
-		char сhoice;
-		std::cin >> сhoice;
-				std::cin.ignore(32767, '\n');
-		switch (сhoice)
-		{
-		case '1':
-		{
-			if (firstVersionWord != "")
-				fullText += tempWord;
-			else
-			fullText += firstVersionWord;
-			std::cout << fullText;
-			wordVariants.clear();
-			tempWord.clear();
-			firstVersionWord.clear();
-			secondVersionWord.clear();
-			thirdVersionWord.clear();
-			break;
-		}
-		case '2':
-		{
-			if (secondVersionWord != "")
-			{
-				fullText += secondVersionWord;
-				tempWord.clear();
-				std::cout << fullText;
-			}
-			else
-			{
-				std::cout << fullText << tempWord;
-			}
-			std::cout << fullText;
-			wordVariants.clear();
-			
-			firstVersionWord.clear();
-			secondVersionWord.clear();
-			thirdVersionWord.clear();
-			break;
-		}
-		case '3':
-		{
-			
 				
-				if (thirdVersionWord != "")
-			{
-				fullText += thirdVersionWord;
-				tempWord.clear();
-				std::cout << fullText;
+				break;
 			}
-				else {
-					std::cout << fullText<< tempWord;
-				}
-			wordVariants.clear();
-			firstVersionWord.clear();
-			secondVersionWord.clear();
-			thirdVersionWord.clear();
-			break;
-		}
-		default:
+					}
+
+			if (!VersionWord.empty())  // если пользователь выбрал какой либо вариант
 		{
-			wordVariants.clear();
-			firstVersionWord.clear();
-			secondVersionWord.clear();
-			thirdVersionWord.clear();
-			std::cout << fullText<<tempWord;
-		break;
+			fullText.erase(fullText.length()-tempWord.length());
+			fullText += VersionWord;
+			tempWord.clear();
+			std::cout << fullText;
 		}
-		}
+		else                                 // если не выбрал 
+			std::cout << fullText;
+		
+		wordVariants.clear();
+		VersionWord.clear();
+		
+		
+
 	}
 	return 0;
 }
 
-// Консольный ч
