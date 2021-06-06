@@ -23,7 +23,7 @@ void insert(TrieNode* root, std::string key)
 {
     TrieNode* node = root;
 
-    for (int i = 0; i < key.length(); i++)
+    for (size_t i = 0; i < key.length(); i++)
     {
         // вычисляем индекс в алфавите через смещение относитьельно первой буквы
         int index = key[i] - 'a';
@@ -45,7 +45,7 @@ bool search(struct TrieNode* root, std::string key)
 {
     struct TrieNode* node = root;
 
-    for (int i = 0; i < key.length(); i++)
+    for (size_t i = 0; i < key.length(); i++)
     {
         int index = key[i] - 'a';
         if (!node->children[index])
@@ -105,27 +105,28 @@ TrieNode* remove(TrieNode* root, std::string key, int depth)
     // возвращаем новый корень
     return root;
 }
-void has_prefix(TrieNode* node, int& cnt_ends)
+void hasPrefix(TrieNode* nodeCurrent, int& countEnds)
 {
-    if (node->isEndOfWord) // если слово кончилось добавить в счетчик
-        cnt_ends++;
+    if (nodeCurrent->isEndOfWord) // если слово кончилось добавить в счетчик
+        countEnds++;
     for (size_t i = 0; i < ALPHABET_SIZE; i++) // идем по дереву и считаем еще концы слов
     {
-        if (node->children[i]) {
-            has_prefix(node->children[i], cnt_ends);
+        if (nodeCurrent->children[i])
+        {
+            hasPrefix(nodeCurrent->children[i], countEnds);
         }
     }
 }
                                                                                                                                                                                                                         
 void findMinPrefixes(TrieNode* root, char buf[], int ind, std::string& res)
 {
-    // ваш код
+    
     
         if (!root)
             return;
-        int cnt = 0;
-        has_prefix(root, cnt);
-        if (cnt == 1)
+        int count = 0;
+         hasPrefix(root, count);
+        if (count == 1)
         {
             buf[ind] = '\0'; // закончить строку
             res += std::string(buf) + " "; // добавить в результат и пробел после
@@ -135,10 +136,79 @@ void findMinPrefixes(TrieNode* root, char buf[], int ind, std::string& res)
         {
             if (root->children[i])
             {
-                char c = i + 'a';
-                buf[ind] = c;
+                char currentChar = i + 'a';
+                buf[ind] = currentChar;
                 findMinPrefixes(root->children[i], buf, ind + 1, res);
             }
         }
 }
-  
+
+void wordSubstitution(TrieNode* root,std::string& result, std::string currentWord ) // функция поиска слов для подстановки
+{
+    if (!root) // если дерево пустое
+        return;
+    char buf[50]; // буфер в которой будем ложить символы подходящие для автоподстановки
+    size_t indexChar = 0;  // индекс для буфера
+       int counterWords = 0; // счётчик слов которые будут предложены для авттоподстановки
+       bool charPresence = true; // проверка наличия символов дерева совпадающих с введённым
+    while (indexChar < currentWord.length()) // ищем совпадения введённой строки с наличием в дереве
+    {
+        if (!charPresence) // если символы нет хот бы одного совпадения 
+            return;
+            charPresence = false;
+        for (int i = 0; i < ALPHABET_SIZE; ++i) // ищем совпадение в узле
+        {
+            if (root->children[i]) // если есть символ в узле
+            {
+                if (currentWord[indexChar] == i + 'a') // и если он совпадает с текущим символом  введённой строки 
+                {
+                    buf[indexChar] = i + 'a';  //  в буфер добавляем символ
+                    indexChar++;               // увеличиваем индекс
+                    root = root->children[i];  // переходим в дочерний узел
+                    charPresence = true;        // соообщаем что символ нашли
+                    i = ALPHABET_SIZE;
+                 if (root->isEndOfWord && indexChar == currentWord.length()) // 
+                {
+                    buf[indexChar] = '\0'; // закончить строку
+                    result += std::string(buf) + " "; // 
+                    counterWords++;
+                  
+                }
+                    else if (indexChar == currentWord.length())
+                    {
+                     buf[indexChar] = '\0'; // закончить строку                  
+                        result += std::string(buf); // 
+                          
+                    }
+                   
+                    
+                }
+            }
+        }
+    }
+   if (counterWords==0)
+    result.clear();
+    charPresence = false;
+    wordSubstitutionInner(root, buf, indexChar, result, counterWords, charPresence);
+}
+void wordSubstitutionInner(TrieNode* root, char buf[], int indexChar, std::string& result,int &counterWords,bool endWord)
+{
+    if (endWord)
+    {
+        buf[indexChar] = '\0'; // закончить строку
+        result += std::string(buf)+" "; // 
+        counterWords++;
+    }
+   
+    for (int i = 0; i < ALPHABET_SIZE; ++i)
+    {
+        if (counterWords >= 3)
+            return;
+        if (root->children[i])
+        {
+           buf[indexChar] = i + 'a';
+           endWord = root->children[i]->isEndOfWord;
+           wordSubstitutionInner(root->children[i], buf, indexChar + 1, result, counterWords, endWord);
+        }
+    }
+}

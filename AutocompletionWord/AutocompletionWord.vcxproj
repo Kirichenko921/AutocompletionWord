@@ -142,6 +142,7 @@
     <ClInclude Include="TrieDictionary.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AutocompletionWord.cpp" />
     <ClCompile Include="TrieDictionary.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

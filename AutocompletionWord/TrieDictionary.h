@@ -13,9 +13,11 @@ struct TrieNode
 };
 
 TrieNode* getNewNode(void);
-void insert(TrieNode*, std::string);
-bool search(TrieNode*, std::string);
+void insert(TrieNode* root, std::string key);
+bool search(TrieNode* root, std::string key);
 bool isEmpty(TrieNode*);
 TrieNode* remove(TrieNode*, std::string, int depth = 0);
-void has_prefix(TrieNode* node, int& cnt_ends);
+void hasPrefix(TrieNode* node, int& cnt_ends);
 void findMinPrefixes(TrieNode* root, char buf[], int ind, std::string& res);
+void wordSubstitution(TrieNode* root, std::string& result, std::string currenWord);
+void wordSubstitutionInner(TrieNode* root, char buf[], int indexChar, std::string& result, int& counterWords, bool endWord);
